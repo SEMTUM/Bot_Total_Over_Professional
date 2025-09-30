@@ -53,8 +53,8 @@ logger = logging.getLogger(__name__)
 headers = {"x-fsign": "SW9D1eZo"}  # Ключ авторизации Flashscore
 
 # НАСТРАИВАЕМЫЕ ПАРАМЕТРЫ
-MIN_AVG_PROBABILITY = 0.50      # Минимальная средняя вероятность
-MIN_BOOKMAKER_ODDS = 1.00       # Минимальный коэффициент букмекера
+MIN_AVG_PROBABILITY = 0.01      # Минимальная средняя вероятность
+MIN_BOOKMAKER_ODDS = 1.70       # Минимальный коэффициент букмекера
 MAX_BOOKMAKER_ODDS = 100.00     # Максимальный коэффициент букмекера
 MIN_OUR_ODDS = 1.00             # Минимальный наш ожидаемый коэффициент
 MAX_OUR_ODDS = 100.00           # Максимальный наш ожидаемый коэффициент
@@ -1085,7 +1085,7 @@ def analyze_loop():
                         logger.info(f"Найден подходящий матч: {match['teams']} (вероятность: {match['avg_probability']}%)")
             
             # Ожидание перед следующим анализом
-            time.sleep(120)
+            time.sleep(180)
             logger.info("Запускаем следующий цикл анализа матчей ...")
             
         except Exception as e:
@@ -1102,7 +1102,7 @@ def results_check_loop():
                 check_match_results()
             
             # Ожидание перед следующей проверкой
-            time.sleep(120)
+            time.sleep(180)
             
         except Exception as e:
             logger.error(f"Критическая ошибка в results_check_loop: {str(e)}", exc_info=True)
