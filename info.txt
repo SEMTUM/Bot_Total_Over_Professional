@@ -1,0 +1,16 @@
+pyinstaller main.spec
+
+
+
+
+pyinstaller --onefile --icon=icon.ico Bot_Total_Over_Pro.py
+
+pyinstaller --onefile --icon=icon.ico Bot_Total_Over_Pro_Live.py
+
+pyinstaller --onefile --icon=icon.ico Bot_Total_Over_Pro_Sbor.py
+
+
+
+
+
+
