@@ -76,7 +76,7 @@ TEL_TOKEN = "8256717454:AAG-mw9JyOqMbX-tNzZ-GriaDMlxn5Zyof8"  # Токен бо�
 ID_ADMIN = "627946014"  # ID администратора (принудительно)
 
 # НАСТРОЙКИ ПОВТОРНЫХ ПОПЫТОК И ЛИМИТОВ
-MAX_RETRY_ATTEMPTS = 10000                 # Количество повторных попыток
+MAX_RETRY_ATTEMPTS = 30                    # Количество повторных попыток
 RETRY_DELAY = 60                           # Увеличиваем задержку между попытками
 API_RETRY_DELAY = 60                       # Задержка при критических ошибках API
 POLLING_TIMEOUT = 90                       # Увеличиваем таймаут для polling
@@ -152,6 +152,13 @@ class StatisticsDB:
                 df = pd.DataFrame(columns=[
                     'Дата',
                     'Матч', 
+                    'poisson',
+                    'weighted_poisson',
+                    'attacking_potential',
+                    'bayesian',
+                    'historical_totals',
+                    'recent_form',
+                    'ml_approach',
                     'Вероятность',
                     'Наш Кэф',
                     'Кэф БК',
@@ -201,11 +208,23 @@ class StatisticsDB:
             else:
                 bet_result = "Неизвестно"
             
+            # Получаем вероятности по методам из данных матча
+            method_probabilities = {}
+            for method_name in ['poisson', 'weighted_poisson', 'attacking_potential', 'bayesian', 'historical_totals', 'recent_form', 'ml_approach']:
+                method_probabilities[method_name] = match_data.get(f'{method_name}_prob', 0)
+            
             # Подготавливаем данные для добавления
             db_match_data = {
                 'Дата': match_data['date_str'],
                 'Матч': match_data['teams'],
-                'Вероятность': f"{match_data['avg_probability']}%",
+                'poisson': method_probabilities['poisson'],
+                'weighted_poisson': method_probabilities['weighted_poisson'],
+                'attacking_potential': method_probabilities['attacking_potential'],
+                'bayesian': method_probabilities['bayesian'],
+                'historical_totals': method_probabilities['historical_totals'],
+                'recent_form': method_probabilities['recent_form'],
+                'ml_approach': method_probabilities['ml_approach'],
+                'Вероятность': match_data['avg_probability'],
                 'Наш Кэф': match_data['our_expected_odds'],
                 'Кэф БК': match_data['odds'],
                 'Счет': match_data['result'],
@@ -794,6 +813,10 @@ def analyze_matches():
                         'status': 'upcoming'
                     }
                     
+                    # Сохраняем вероятности по каждому методу для базы данных
+                    for method_name, prob in probability_results:
+                        match_data[f'{method_name.lower().replace(".", "").replace(" ", "_")}_prob'] = prob
+                    
                     list_live.append(match_data)
         
         return list_live
@@ -918,9 +941,9 @@ def update_match_card(match):
                         except:
                             pass
                     else:
-                        logger.error(f"Не удалось обновить сообщение в чате {chat_id}: {str(e)}")
+                        logger.error(f"Не удалось обновить сообщение в чат {chat_id}: {str(e)}")
                 except Exception as e:
-                    logger.error(f"Не удалось обновить сообщение в чате {chat_id}: {str(e)}")
+                    logger.error(f"Не удалось обновить сообщение в чат {chat_id}: {str(e)}")
     
     except Exception as e:
         logger.error(f"Ошибка при обновлении карточки матча: {str(e)}", exc_info=True)
@@ -1085,7 +1108,7 @@ def analyze_loop():
                         logger.info(f"Найден подходящий матч: {match['teams']} (вероятность: {match['avg_probability']}%)")
             
             # Ожидание перед следующим анализом
-            time.sleep(180)
+            time.sleep(300)
             logger.info("Запускаем следующий цикл анализа матчей ...")
             
         except Exception as e:
@@ -1102,7 +1125,7 @@ def results_check_loop():
                 check_match_results()
             
             # Ожидание перед следующей проверкой
-            time.sleep(180)
+            time.sleep(300)
             
         except Exception as e:
             logger.error(f"Критическая ошибка в results_check_loop: {str(e)}", exc_info=True)
