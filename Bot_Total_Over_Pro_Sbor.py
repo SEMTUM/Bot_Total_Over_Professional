@@ -55,7 +55,7 @@ headers = {"x-fsign": "SW9D1eZo"}  # Ключ авторизации Flashscore
 # НАСТРАИВАЕМЫЕ ПАРАМЕТРЫ
 MIN_AVG_PROBABILITY = 0.01      # Минимальная средняя вероятность
 MIN_BOOKMAKER_ODDS = 1.70       # Минимальный коэффициент букмекера
-MAX_BOOKMAKER_ODDS = 100.00     # Максимальный коэффициент букмекера
+MAX_BOOKMAKER_ODDS = 100.00       # Максимальный коэффициент букмекера
 MIN_OUR_ODDS = 1.00             # Минимальный наш ожидаемый коэффициент
 MAX_OUR_ODDS = 100.00           # Максимальный наш ожидаемый коэффициент
 STAT_DB = True                  # Включить сбор статистики в базу данных
@@ -211,7 +211,12 @@ class StatisticsDB:
             # Получаем вероятности по методам из данных матча
             method_probabilities = {}
             for method_name in ['poisson', 'weighted_poisson', 'attacking_potential', 'bayesian', 'historical_totals', 'recent_form', 'ml_approach']:
-                method_probabilities[method_name] = match_data.get(f'{method_name}_prob', 0)
+                method_prob = match_data.get(f'{method_name}_prob')
+                if method_prob is not None:
+                    method_probabilities[method_name] = method_prob
+                else:
+                    method_probabilities[method_name] = 0
+                    logger.warning(f"Вероятность для метода {method_name} не найдена в данных матча")
             
             # Подготавливаем данные для добавления
             db_match_data = {
@@ -814,8 +819,22 @@ def analyze_matches():
                     }
                     
                     # Сохраняем вероятности по каждому методу для базы данных
+                    method_name_mapping = {
+                        'Пуассон': 'poisson',
+                        'Взвеш.Пуассон': 'weighted_poisson', 
+                        'Атака': 'attacking_potential',
+                        'Байесовский': 'bayesian',
+                        'Историч.тотал': 'historical_totals',
+                        'Форма': 'recent_form',
+                        'ML подход': 'ml_approach'
+                    }
+                    
                     for method_name, prob in probability_results:
-                        match_data[f'{method_name.lower().replace(".", "").replace(" ", "_")}_prob'] = prob
+                        db_method_name = method_name_mapping.get(method_name)
+                        if db_method_name:
+                            match_data[f'{db_method_name}_prob'] = prob
+                        else:
+                            logger.warning(f"Неизвестное имя метода: {method_name}")
                     
                     list_live.append(match_data)
         
