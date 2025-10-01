@@ -48,7 +48,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 # ==============================================
-# КОНФИГУРАЦИЯ BOT TOTAL OVER PRO SBOR
+# КОНФИГУРАЦИЯ BOT TOTAL OVER PRO SBOR 
 # ==============================================
 headers = {"x-fsign": "SW9D1eZo"}  # Ключ авторизации Flashscore
 
