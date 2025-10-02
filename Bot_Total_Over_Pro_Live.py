@@ -55,7 +55,7 @@ headers = {"x-fsign": "SW9D1eZo"}  # Ключ авторизации Flashscore
 # НАСТРАИВАЕМЫЕ ПАРАМЕТРЫ
 MIN_AVG_PROBABILITY = 0.90      # Минимальная средняя вероятность
 MIN_BOOKMAKER_ODDS = 1.00       # Минимальный коэффициент букмекера
-MAX_BOOKMAKER_ODDS = 1.50       # Максимальный коэффициент букмекера
+MAX_BOOKMAKER_ODDS = 1.35       # Максимальный коэффициент букмекера
 MIN_OUR_ODDS = 1.00             # Минимальный наш ожидаемый коэффициент
 MAX_OUR_ODDS = 100.00           # Максимальный наш ожидаемый коэффициент
 STAT_DB = True                  # Включить сбор статистики в базу данных
@@ -686,9 +686,9 @@ def create_methods_visualization(probability_results):
     visualization = []
     for name, prob in probability_results:
         prob_percent = prob * 100
-        if prob_percent >= 95:
+        if prob_percent >= 90:
             visualization.append("🟢")
-        elif prob_percent >= 85:
+        elif prob_percent >= 80:
             visualization.append("🟡")
         else:
             visualization.append("🔴")
